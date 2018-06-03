@@ -165,13 +165,13 @@ if __name__ == '__main__':
 
         if d is not None:
             tt = tz.localize(d[1], is_dst=None)
-            with open('/home/roboao/Software/Status/dewpoint_status', 'w') as f:
+            with open('/home/kped/Software/Status/dewpoint_status', 'w') as f:
                 f.write('{:s} '.format(tt.astimezone(pytz.utc).strftime('%Y-%m-%d %H:%M:%S') + '.000') +
                         '{:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.format(*d[2:]))
 
         if e is not None:
             tt = tz.localize(e[1], is_dst=None)
-            with open('/home/roboao/Software/Status/environment_status', 'w') as f:
+            with open('/home/kped/Software/Status/environment_status', 'w') as f:
                 f.write('{:s} '.format(tt.astimezone(pytz.utc).strftime('%Y-%m-%d %H:%M:%S') + '.000') +
    '{:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.3f}\n'.format(*e[2:]))
     finally:
