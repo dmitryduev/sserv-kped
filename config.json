@@ -129,8 +129,7 @@
       "Total system memory usage, %": [[3], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true],
       "Disk usage, %": {
         "/": [[4], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true],
-        "/Data": [[5], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true],
-        "/Data1": [[6], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true]
+        "/Data": [[5], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true]
       }
     }
   }
