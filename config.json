@@ -1,7 +1,7 @@
 {
   "settings": {
-    "logo": "Robo-AO",
-    "logo-font-family": "Akashi",
+    "logo": "KPED",
+    "logo-font-family": "sans-serif",
     "port": 8080,
     "telemetry_update_ms": 900,
     "images_update_ms": 900,
@@ -9,7 +9,7 @@
     "max_dynamic_log_lines": 500
   },
   "auth": {
-    "roboao": "0e07deece90838a3e11b50956927a2a76a507829"
+    "kped": "cb382adb48e3707c78daaf11759dc53a3c177ccb"
   },
   "system": {
     "stop-file": "/home/kped/Software/Status/robod.stop_file"
