@@ -120,8 +120,7 @@
       "oil_pad1_t, °C": [[12], {}, [true, 100, "UTC"], false],
       "wind_speed, mph": [[13], {"success": [[0, 30]], "danger": [[40, 1e9]], "warning": [[30, 40]]}, [true, 100, "UTC"], true],
       "wind_direction, °": [[14], {}, [true, 100, "UTC"], false],
-      "truss_t, °C": [[15], {"info": [[-40, 100]]}, [true, 100, "UTC"], false],
-      "LFP, mm": [[16], {}, [true, 100, "UTC"], false]
+      "truss_t, °C": [[15], {"info": [[-40, 100]]}, [true, 100, "UTC"], false]
     },
     "Control machine status": {
       "data-file": "/home/kped/Software/Status/system_status",
@@ -131,10 +130,7 @@
       "Disk usage, %": {
         "/": [[4], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true],
         "/Data": [[5], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true],
-        "/Data1": [[6], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true],
-        "/Data2": [[7], {}, [true, 600, "UTC"], false],
-        "/Data3": [[8], {}, [true, 600, "UTC"], false],
-        "/Data4": [[9], {}, [true, 600, "UTC"], false]
+        "/Data1": [[6], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true]
       }
     }
   }

@@ -32,14 +32,10 @@ if __name__ == '__main__':
             _mem_usage = psutil.virtual_memory().percent
             _root = psutil.disk_usage('/').percent
             _data = psutil.disk_usage('/Data').percent
-            _data_1 = psutil.disk_usage('/Data1').percent
-            _data_2 = psutil.disk_usage('/Data2').percent
-            _data_3 = psutil.disk_usage('/Data3').percent
-            _data_4 = psutil.disk_usage('/Data4').percent
 
-            _t = '{:s} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.format(
+            _t = '{:s} {:.1f} {:.1f} {:.1f} {:.1f}\n'.format(
                                                 _utc_now, _cpu_usage, _mem_usage,
-                                               _root, _data, _data_1, _data_2, _data_3, _data_4)
+                                               _root, _data)
             with open(config['status']['Control machine status']['data-file'], 'w') as _f:
                 _f.write(_t)
         except Exception as _e:
