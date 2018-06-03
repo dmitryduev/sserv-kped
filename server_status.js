@@ -482,22 +482,22 @@ app.get('/log',  ensureLoggedIn('/login'),
 );
 
 // run system page
-app.get('/system', ensureLoggedIn('/login'),
-    function(req, res){
-    // logged in?
-    if (req.user) {
-        // get file names:
-        // var log_names = logNames(config['logs']);
-        // console.log(log_names);
-        res.render('system.html', {logo: config['settings']['logo'],
-                                logo_font_family: config['settings']['logo-font-family'],
-                                external_links: config['external_links']});
-    }
-    else {
-        // not logged in
-        res.redirect('/login');
-    }
-});
+// app.get('/system', ensureLoggedIn('/login'),
+//     function(req, res){
+//     // logged in?
+//     if (req.user) {
+//         // get file names:
+//         // var log_names = logNames(config['logs']);
+//         // console.log(log_names);
+//         res.render('system.html', {logo: config['settings']['logo'],
+//                                 logo_font_family: config['settings']['logo-font-family'],
+//                                 external_links: config['external_links']});
+//     }
+//     else {
+//         // not logged in
+//         res.redirect('/login');
+//     }
+// });
 
 
 // start listening
@@ -535,14 +535,14 @@ function LoopImg() {
         //console.log(stderr);
         //console.log(error);
         if (error == null) {
-            fs.readFile(config['images']['location'] + '/dm.png', function(err, buf){
-                // io.emit('dm', { image: true, buffer: buf.toString('base64') });
-                io.emit('dm', { image: true, buffer: buf });
-            });
-            fs.readFile(config['images']['location'] + '/wfs.png', function(err, buf){
-                // io.emit('wfs', { image: true, buffer: buf.toString('base64') });
-                io.emit('wfs', { image: true, buffer: buf });
-            });
+            // fs.readFile(config['images']['location'] + '/dm.png', function(err, buf){
+            //     // io.emit('dm', { image: true, buffer: buf.toString('base64') });
+            //     io.emit('dm', { image: true, buffer: buf });
+            // });
+            // fs.readFile(config['images']['location'] + '/wfs.png', function(err, buf){
+            //     // io.emit('wfs', { image: true, buffer: buf.toString('base64') });
+            //     io.emit('wfs', { image: true, buffer: buf });
+            // });
             fs.readFile(config['images']['location'] + '/vicd.png', function(err, buf){
                 // io.emit('vicd', { image: true, buffer: buf.toString('base64') });
                 io.emit('vicd', { image: true, buffer: buf });
@@ -556,38 +556,38 @@ function LoopImg() {
 LoopImg();
 
 // Listen for commands from the system page
-io.on('connection', function(socket){
-    socket.on('system-cmd', function(cmd){
-        // console.log(cmd);
-        // try to read in stop-file. if not exists, will throw error
-        fs.readFile(config['system']['stop-file'], function(err, data) {
-            if (err) {
-                // if file does not exist -> create
-                if (err.code == 'ENOENT') {
-                    // console.error(err.message);
-                    try {
-                        fs.closeSync(fs.openSync(config['system']['stop-file'], 'w'));
-                        // emit toggled status
-                        // io.emit(cmd, 'on');
-                    }
-                    finally {}
-                }
-                else {
-                    // console.error(err);
-                }
-            }
-            else {
-                // if file exists -> remove
-                try {
-                    fs.unlink(config['system']['stop-file']);
-                    // emit toggled status
-                    // io.emit(cmd, 'off');
-                }
-                finally {}
-            }
-        });
-    });
-});
+// io.on('connection', function(socket){
+//     socket.on('system-cmd', function(cmd){
+//         // console.log(cmd);
+//         // try to read in stop-file. if not exists, will throw error
+//         fs.readFile(config['system']['stop-file'], function(err, data) {
+//             if (err) {
+//                 // if file does not exist -> create
+//                 if (err.code == 'ENOENT') {
+//                     // console.error(err.message);
+//                     try {
+//                         fs.closeSync(fs.openSync(config['system']['stop-file'], 'w'));
+//                         // emit toggled status
+//                         // io.emit(cmd, 'on');
+//                     }
+//                     finally {}
+//                 }
+//                 else {
+//                     // console.error(err);
+//                 }
+//             }
+//             else {
+//                 // if file exists -> remove
+//                 try {
+//                     fs.unlink(config['system']['stop-file']);
+//                     // emit toggled status
+//                     // io.emit(cmd, 'off');
+//                 }
+//                 finally {}
+//             }
+//         });
+//     });
+// });
 
 io.on('connection', function(socket) {
     socket.on('ssh-cmd', function (cmd) {
@@ -613,33 +613,33 @@ io.on('connection', function(socket) {
 
 
 // stop file monitoring loop
-function LoopStopFile() {
-    // try to read in stop-file. if not exists, will throw error
-    fs.readFile(config['system']['stop-file'], function(err, data) {
-        if (err) {
-            // if file does not exist
-            if (err.code == 'ENOENT') {
-                // console.error(err.message);
-                try {
-                    // emit status
-                    io.emit('halt', 'off');
-                }
-                finally {}
-            }
-            else {
-                // console.error(err);
-            }
-        }
-        else {
-            // if file exists
-            try {
-                // emit status
-                io.emit('halt', 'on');
-            }
-            finally {}
-        }
-    });
-    setTimeout(function() {LoopStopFile()}, config['settings']['stop_file_update_ms']);
-}
-
-LoopStopFile();
+// function LoopStopFile() {
+//     // try to read in stop-file. if not exists, will throw error
+//     fs.readFile(config['system']['stop-file'], function(err, data) {
+//         if (err) {
+//             // if file does not exist
+//             if (err.code == 'ENOENT') {
+//                 // console.error(err.message);
+//                 try {
+//                     // emit status
+//                     io.emit('halt', 'off');
+//                 }
+//                 finally {}
+//             }
+//             else {
+//                 // console.error(err);
+//             }
+//         }
+//         else {
+//             // if file exists
+//             try {
+//                 // emit status
+//                 io.emit('halt', 'on');
+//             }
+//             finally {}
+//         }
+//     });
+//     setTimeout(function() {LoopStopFile()}, config['settings']['stop_file_update_ms']);
+// }
+//
+// LoopStopFile();

@@ -12,147 +12,25 @@
     "roboao": "0e07deece90838a3e11b50956927a2a76a507829"
   },
   "system": {
-    "stop-file": "/home/roboao/Software/Status/robod.stop_file"
+    "stop-file": "/home/kped/Software/Status/robod.stop_file"
   },
   "external_links": {
-    "Twiki": "http://www.oir.caltech.edu/twiki_oir/bin/viewauth/Palomar/RoboAO/WebHome"
+    "Twiki": "#"
   },
   "logs": {
     "Current logs": {
-      "location": "/home/roboao/Logs/",
+      "location": "/home/kped/Software/Logs/",
       "extensions": ["log"],
       "type": "dynamic"
-    },
-    "Logs from last night": {
-      "location": "/home/roboao/web/Lastnight/",
-      "extensions": ["log", "dat"],
-      "type": "static"
     }
   },
   "images": {
     "location": "public",
-    "generate_cmd": "/home/roboao/Work/dima/sserv-njs/lib/png2 /home/roboao/Work/dima/sserv-njs/public /home/roboao/Status"
+    "generate_cmd": "/home/kped/web/sserv-kped/lib/png2 /home/kped/web/sserv-kped/public /home/kped/Software/Status"
   },
   "status" : {
-    "Queue information": {
-      "data-file": "/home/roboao/Status/robod_status",
-      "Time stamp": [[0, 2], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
-      "Project": [[9], {}, [false], false],
-      "Name": [[2], {}, [false], false],
-      "State": [[11], {}, [false], false],
-      "Object": {
-        "RA": [[3], {}, [false], false],
-        "Dec": [[4], {}, [false], false],
-        "Epoch": [[5], {}, [false], false],
-        "Mag": [[6], {}, [false], false]
-      },
-      "Observation": {
-        "Exposure, s": [[7], {}, [false], false],
-        "Filter": [[8], {}, [false], false]
-      }
-    },
-    "Laser system": {
-      "data-file": "/home/roboao/Status/laser_status",
-      "Time stamp": [[0, 2], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
-      "Status": [[13, 15], {"success": ["|No Fault|", "OK"], "danger": ["Error"]}, [false], true],
-      "Laser diode": {
-        "T, °C": [[6], {"success": [[16, 20]], "danger": [[0, 13], [25, 50]], "warning": [[13, 16], [20, 25]]}, [true, 600, "UTC"], true],
-        "C, A": [[7], {"success":[[33, 34]], "warning": [[30, 33], [34, 36]], "danger": [[0, 30], [36, 50]]}, [true, 600, "UTC"], true],
-        "State": [[2], {"success": ["ON"], "info": ["OFF"]}, [false], false]
-      },
-      "Laser": {
-        "P, W": [[5], {"success": [[10, 12]], "danger": [[0, 8]], "warning": [[8, 10]]}, [true, 600, "UTC"], false],
-        "Sleep": [[12], {}, [false], false],
-        "Shutter": [[4], {"info": ["CLSD"]}, [false], false],
-        "Interlock": [[3], {"success": ["CLSD"], "danger": ["OPEN"]}, [false], false]
-      },
-      "Chiller": {
-        "T, °C": [[10], {"success": [[9, 12]], "danger": [[-1e9, 9], [16, 1e9]], "warning": [[12, 16]]}, [true, 600, "UTC"], false],
-        "Op, s": [[11], {"success": [[0, 10]], "danger": [[20, 32]], "warning": [[10, 20]]}, [true, 600, "UTC"], false],
-        "Flow": [[8], {"success": ["FLOWING"], "danger": ["NO_FLOW"]}, [false], true],
-        "Reservoir": [[9], {"success": ["OK"], "danger": ["Error"]}, [false], true]
-      }
-    },
-    "LCH File Status": {
-      "data-file": "/home/roboao/Status/LCH_file_status",
-      "Time stamp": [[1, 3], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
-      "Load time": [[3], {"success": [[0, 86400]], "danger": [[86400, 1e9], [-1e9, 0]]}, [false], true],
-      "JDAY": [[4], {}, [false], false],
-      "File 1": [[5], {"danger": ["NO_PAM_LOADED!"]}, [false], true],
-      "File 2": [[6], {}, [false], false],
-      "File 3": [[7], {}, [false], false],
-      "File 4": [[8], {}, [false], false]
-    },
-    "AO system": {
-      "data-file": "/home/roboao/Status/ao_system_status",
-      "Time stamp": [[0, 2], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
-      "Focus": {
-        "Current, nm": [[17], {}, [false], false],
-        "Average, nm": [[18], {}, [false], false],
-        "Secondary Refocus, nm": [[21], {"success": [[-0.25, 0.25]], "danger": [[-5, -0.5, 0.5, 5]], "warning": [[-0.5, -0.25], [0.25, 0.5]]}, [true, 600, "UTC"], false]
-      },
-      "Average Intensity": {
-        "Intensity": [[20], {"success": [[100, 10000]], "danger": [[0, 75]], "warning": [[75, 100]]}, [true, 600, "UTC"], true]
-      },
-      "Deformable Mirror": {
-        "Min value": [[14], {"success": [[1000, 44000]], "danger": [[0, 100], [44900, 45000]], "warning": [[100, 1000], [44000, 44900]]}, [false], false],
-        "Median value": [[16], {"success": [[1000, 44000]], "danger": [[0, 100], [44900, 45000]], "warning": [[100, 1000], [44000, 44900]]}, [false], false],
-        "Max value": [[15], {"success": [[1000, 44000]], "danger": [[0, 100], [44900, 45000]], "warning": [[100, 1000], [44000, 44900]]}, [false], false],
-        "r_0": [[19], {}, [true, 600, "UTC"], false]
-      }
-    },
-    "AO loop": {
-      "data-file": "/home/roboao/Status/ao_system_status",
-      "Time stamp": [[0, 2], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
-      "DM loop": {
-        "Run Time": [[2], {}, [false], false],
-        "Frames": [[3], {}, [false], false],
-        "Frame rate": [[4], {}, [false], false],
-        "Skips": [[6], {}, [false], false],
-        "Drops": [[7], {}, [false], false]
-      },
-      "TT loop": {
-        "Run Time": [[8], {}, [false], false],
-        "Frames": [[9], {}, [false], false],
-        "Frame rate": [[10], {}, [false], false],
-        "Skips": [[12], {}, [false], false],
-        "Drops": [[13], {}, [false], false]
-      }
-    },
-    "Tip-tilt": {
-      "data-file": "/home/roboao/Status/ao_system_status",
-      "Time stamp": [[0, 2], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
-      "NGS TT Actuator Positions": {
-        "Tip-tilt 1": [[12], {"success": [[2000, 64000]], "danger": [[0, 1000], [65000, 66000]], "warning": [[1000, 2000], [64000, 65000]]}, [false], false],
-        "Tip-tilt 2": [[13], {"success": [[2000, 64000]], "danger": [[0, 1000], [65000, 66000]], "warning": [[1000, 2000], [64000, 65000]]}, [false], false]
-      },
-      "Laser TT Actuator Positons": {
-        "Tip-tilt 3": [[22], {"success": [[2000, 64000]], "danger": [[0, 1000], [65000, 66000]], "warning": [[1000, 2000], [64000, 65000]]}, [false], false],
-        "Tip-tilt 4": [[23], {"success": [[2000, 64000]], "danger": [[0, 1000], [65000, 66000]], "warning": [[1000, 2000], [64000, 65000]]}, [false], false]
-      }
-    },
-    "ADC": {
-      "data-file": "/home/roboao/Status/adcd_status",
-      "Time stamp": [[0, 2], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
-      "Updating": [[3], {"success": ["YES"], "danger": ["NO"]}, [false], true],
-      "Positions": {
-        "Zenith Cone": [[12], {}, [false], false],
-        "Parallactic Angle, °": [[13], {}, [false], false],
-        "Prism Angle, °": [[14], {}, [false], false]
-      },
-      "Motors": {
-        "Axis 1, °": [[15], {}, [false], false],
-        "Axis 2, °": [[16], {}, [false], false]
-      },
-      "Pointing": {
-        "RA, h": [[7], {}, [false], false],
-        "Dec, °": [[8], {}, [false], false],
-        "HA, h": [[10], {}, [false], false],
-        "Zenith angle, °": [[11], {"success": [[0, 63]], "warning": [[63, 90]]}, [false], false]
-      }
-    },
     "VIC": {
-      "data-file": "/home/roboao/Status/vicd_status",
+      "data-file": "/home/kped/Software/Status/vicd_status",
       "Time stamp": [[0, 2], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
       "Camera": {
         "Status error": [[2], {}, [false], true],
@@ -173,7 +51,7 @@
       }
     },
     "TCS": {
-      "data-file": "/home/roboao/Status/tcs_status",
+      "data-file": "/home/kped/Software/Status/tcs_status",
       "Time stamp": [[1, 3], {"success": [[-5, 2]], "danger": [[2, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
       "Telescope": {
         "Initialized": [[4], {}, [false], false],
@@ -214,7 +92,7 @@
       }
     },
     "Weather station data": {
-      "data-file": "/home/roboao/Status/dewpoint_status",
+      "data-file": "/home/kped/Software/Status/dewpoint_status",
       "Time stamp": [[0, 2], {"success": [[-600, 20]], "danger": [[20, 1e9], [-1e9, -1200]], "warning": [[-1200, -600]]}, [false], true],
       "Wind direction, °": [[2], {}, [false], false],
       "Wind speed, mph": [[3], {"success": [[0, 30]], "danger": [[40, 1e9]], "warning": [[30, 40]]}, [true, 100, "UTC"], true],
@@ -228,7 +106,7 @@
       "Rain": [[11], {}, [false], false]
     },
     "Environmental data": {
-      "data-file": "/home/roboao/Status/environment_status",
+      "data-file": "/home/kped/Software/Status/environment_status",
       "Time stamp": [[0, 2], {"success": [[-1000, 20]], "danger": [[20, 1e9], [-1e9, -1200]], "warning": [[-1200, -1000]]}, [false], true],
       "sec_mir_t, °C": [[3], {"info": [[-40, 100]]}, [true, 100, "UTC"], false],
       "pier_stairs, °C": [[4], {"info": [[-40, 100]]}, [true, 100, "UTC"], false],
@@ -246,7 +124,7 @@
       "LFP, mm": [[16], {}, [true, 100, "UTC"], false]
     },
     "Control machine status": {
-      "data-file": "/home/roboao/Status/system_status",
+      "data-file": "/home/kped/Software/Status/system_status",
       "Time stamp": [[0, 2], {"success": [[-5, 5]], "danger": [[5, 1e9], [-1e9, -60]], "warning": [[-60, -5]]}, [false], true],
       "Total system CPU usage, %": [[2], {}, [true, 600, "UTC"], false],
       "Total system memory usage, %": [[3], {"success": [[0, 80]], "danger": [[90, 101]], "warning": [[80, 90]]}, [true, 600, "UTC"], true],
