@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Dr. Dmitry A. Duev">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/robot-favicon.png" />
+
+    <title>Robo-AO Kitt Peak status images</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+
+    <!-- Custom styles for this page -->
+    <style>
+
+        body {
+            padding-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .template {
+            padding-top: 3.5rem;
+            text-align: center;
+        }
+        .navbar {
+            padding: 0.3rem 2rem !important;
+        }
+        @font-face {
+            font-family: Akashi;
+            src: url('/static/fonts/akashi.ttf');
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            /* Set the fixed height of the footer here */
+            height: 30px;
+            line-height: 30px; /* Vertically center the text there */
+            background-color: #212529;
+        }
+        @media only screen and (max-width: 768px) {
+            .footer  {
+                display:none;
+            }
+        }
+        .bg-danger {
+            color: #fce2e2 !important;
+        }
+        .badge-danger {
+            color: #fce2e2 !important;
+        }
+        .bg-danger>a {
+            color: #fce2e2 !important;
+        }
+        .bg-info {
+            color: #e2e2fc !important;
+        }
+        .bg-info>a {
+            color: #e2e2fc !important;
+        }
+        .bg-success {
+            color: #e2fce2 !important;
+        }
+        .bg-success>a {
+            color: #e2fce2 !important;
+        }
+    </style>
+
+    <!-- Bootstrap core JavaScript
+================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootbox.min.js"></script>
+    <script src="/static/js/bootstrap-notify.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.slim.js"></script>
+
+    <!-- Switch button -->
+    <script>
+        $(document).ready(function() {
+            $('.btn-toggle').click(function () {
+                $(this).find('.btn').toggleClass('active');
+
+                if ($(this).find('.btn-primary').length > 0) {
+                    $(this).find('.btn').toggleClass('btn-primary');
+                }
+                if ($(this).find('.btn-danger').length > 0) {
+                    $(this).find('.btn').toggleClass('btn-danger');
+                }
+                if ($(this).find('.btn-success').length > 0) {
+                    $(this).find('.btn').toggleClass('btn-success');
+                }
+                if ($(this).find('.btn-info').length > 0) {
+                    $(this).find('.btn').toggleClass('btn-info');
+                }
+
+                $(this).find('.btn').toggleClass('btn-outline-secondary');
+
+            });
+        });
+    </script>
+
+    <!-- Images -->
+    <script>
+
+        $(document).ready(function() {
+            var ctx_dm = document.getElementById('canvas-dm').getContext('2d');
+
+            var ctx_wfs = document.getElementById('canvas-wfs').getContext('2d');
+            // flip vertically (as the png is somehow flipped):
+            //ctx_wfs.translate(0, 300);
+            //ctx_wfs.scale(1, -1);
+
+            var ctx_vicd = document.getElementById('canvas-vicd').getContext('2d');
+
+            if (window.innerWidth > 700) {
+                ctx_dm.canvas.width  = 280;
+                ctx_dm.canvas.height = 280;
+                ctx_wfs.canvas.width  = 280;
+                ctx_wfs.canvas.height = 280;
+                ctx_vicd.canvas.width  = 565;
+                ctx_vicd.canvas.height = 565;
+            }
+            else {
+                ctx_dm.canvas.width  = 140;
+                ctx_dm.canvas.height = 140;
+                ctx_wfs.canvas.width  = 140;
+                ctx_wfs.canvas.height = 140;
+                ctx_vicd.canvas.width  = 282;
+                ctx_vicd.canvas.height = 282;
+            }
+
+            // disable smoothing
+            ctx_dm.imageSmoothingEnabled = false;
+            ctx_dm.webkitImageSmoothingEnabled = false;
+            ctx_dm.msImageSmoothingEnabled = false;
+            ctx_dm.mozImageSmoothingEnabled = false;
+            ctx_wfs.imageSmoothingEnabled = false;
+            ctx_wfs.mozImageSmoothingEnabled = false;
+            ctx_wfs.webkitImageSmoothingEnabled = false;
+            ctx_wfs.msImageSmoothingEnabled = false;
+            ctx_vicd.imageSmoothingEnabled = false;
+            ctx_vicd.mozImageSmoothingEnabled = false;
+            ctx_vicd.webkitImageSmoothingEnabled = false;
+            ctx_vicd.msImageSmoothingEnabled = false;
+
+            var socket = io();
+
+            // init canvases:
+            var img_dm = new Image();
+            var img_wfs = new Image();
+            var img_vicd = new Image();
+
+            var dm_width = ctx_dm.canvas.clientWidth;
+            var dm_height = ctx_dm.canvas.clientHeight;
+            var wfs_width = ctx_wfs.canvas.clientWidth;
+            var wfs_height = ctx_wfs.canvas.clientHeight;
+
+            // init pointing helpers for vicd
+            var VIC_width = ctx_vicd.canvas.clientWidth;  // this is 36 arcsec
+            var VIC_height = ctx_vicd.canvas.clientHeight;  // this is 36 arcsec
+
+            var IRC_width = 20 * VIC_width / 36;
+            var IRC_height = 16 * VIC_height / 36;
+
+            // before alignment in March 2017
+            //var IRC_offset_x = 0.94 * VIC_width / 36;
+            //var IRC_offset_y = 2.19 * VIC_height / 36;
+            // after alignment:
+            var IRC_offset_x = 0;
+            var IRC_offset_y = 0;
+
+            // dither center positions for IR camera:
+            var IRC_offset_dither_1_x = -5 * VIC_width / 36;
+            var IRC_offset_dither_1_y = 0;
+            var IRC_offset_dither_2_x = 5 * VIC_width / 36;
+            var IRC_offset_dither_2_y = 0;
+            // console.log(VIC_width, ' ', VIC_height, ' ', IRC_width, ' ', IRC_height, ' ');
+
+            // prepare canvases
+            img_dm.onload = function() {
+                // Clear canvas and immediately paint the image
+                ctx_dm.clearRect(0, 0, dm_width, dm_height);
+                ctx_dm.drawImage(img_dm, 0, 0, dm_width, dm_height);
+            };
+            img_wfs.onload = function() {
+                // Clear canvas and immediately paint the image
+                ctx_wfs.clearRect(0, 0, wfs_width, wfs_height);
+                ctx_wfs.drawImage(img_wfs, 0, 0, wfs_width, wfs_height);
+            };
+            img_vicd.onload = function() {
+                // Clear canvas and immediately paint the image
+                ctx_vicd.clearRect(0, 0, VIC_width, VIC_height);
+//                ctx_vicd.drawImage(img_vicd, 0, 0);
+                ctx_vicd.drawImage(img_vicd, 0, 0, VIC_width, VIC_height);
+
+                if ($('#ir-fov-on').hasClass( "active" )) {
+                    // IR camera box
+                    ctx_vicd.beginPath();
+                    ctx_vicd.strokeStyle = "#ffffff";
+                    ctx_vicd.lineWidth = 1;
+                    var start_rect_x = (VIC_width - IRC_width)/2 + IRC_offset_x;
+                    var start_rect_y = (VIC_height - IRC_height)/2 - IRC_offset_y;
+                    ctx_vicd.rect(start_rect_x, start_rect_y, IRC_width, IRC_height);
+                    ctx_vicd.stroke();
+                    ctx_vicd.closePath();
+                    // pointing circle for VIC
+                    var radius_vic = VIC_width / 36; // 1" in pix
+                    ctx_vicd.beginPath();
+                    ctx_vicd.strokeStyle = '#BADA55';
+                    ctx_vicd.lineWidth = 2;
+                    ctx_vicd.arc(VIC_width/2, VIC_height/2, radius_vic, 0, 2 * Math.PI, false);
+                    ctx_vicd.stroke();
+                    ctx_vicd.closePath();
+                    // pointing circle for IRC
+                    if (Math.abs(IRC_offset_x) > 0 && Math.abs(IRC_offset_y) > 0) {
+                        var radius_ir = VIC_width / 36; // 1" in pix
+                        ctx_vicd.beginPath();
+                        ctx_vicd.strokeStyle = '#ff6445';
+                        ctx_vicd.lineWidth = 2;
+                        ctx_vicd.arc(VIC_width / 2 + IRC_offset_x, VIC_height / 2 - IRC_offset_y,
+                            radius_ir, 0, 2 * Math.PI, false);
+                        ctx_vicd.stroke();
+                        ctx_vicd.closePath();
+                    }
+                    // dither centers:
+                    var radius_ir_dither = VIC_width / 36 / 4; // 0.25" in pix
+                    // first center
+                    ctx_vicd.beginPath();
+                    ctx_vicd.strokeStyle = '#ff6445';
+                    ctx_vicd.lineWidth = 1;
+                    ctx_vicd.arc(VIC_width / 2 + IRC_offset_x + IRC_offset_dither_1_x,
+                        VIC_height / 2 - IRC_offset_y + IRC_offset_dither_1_y,
+                        radius_ir_dither, 0, 2 * Math.PI, false);
+                    ctx_vicd.stroke();
+                    ctx_vicd.closePath();
+                    // second center
+                    ctx_vicd.beginPath();
+                    ctx_vicd.strokeStyle = '#ff6445';
+                    ctx_vicd.lineWidth = 1;
+                    ctx_vicd.arc(VIC_width / 2 + IRC_offset_x + IRC_offset_dither_2_x,
+                        VIC_height / 2 - IRC_offset_y + IRC_offset_dither_2_y,
+                        radius_ir_dither, 0, 2 * Math.PI, false);
+                    ctx_vicd.stroke();
+                    ctx_vicd.closePath();
+                }
+            };
+
+            socket.on('dm', function (info) {
+                if (info.image) {
+                    var uint8Arr = new Uint8Array(info.buffer);
+                    var binary = '';
+                    for (var i = 0; i < uint8Arr.length; i++) {
+                        binary += String.fromCharCode(uint8Arr[i]);
+                    }
+                    var base64String = window.btoa(binary);
+
+                    img_dm.src = 'data:image/png;base64,' + base64String;
+                }
+            });
+
+            socket.on('wfs', function (info) {
+                if (info.image) {
+                    var uint8Arr = new Uint8Array(info.buffer);
+                    var binary = '';
+                    for (var i = 0; i < uint8Arr.length; i++) {
+                        binary += String.fromCharCode(uint8Arr[i]);
+                    }
+                    var base64String = window.btoa(binary);
+
+                    img_wfs.src = 'data:image/png;base64,' + base64String;
+                }
+            });
+
+            socket.on('vicd', function (info) {
+                if (info.image) {
+                    var uint8Arr = new Uint8Array(info.buffer);
+                    var binary = '';
+                    for (var i = 0; i < uint8Arr.length; i++) {
+                        binary += String.fromCharCode(uint8Arr[i]);
+                    }
+                    var base64String = window.btoa(binary);
+
+                    img_vicd.src = 'data:image/png;base64,' + base64String;
+
+                }
+            });
+
+            // status bar
+            socket.on('telemetry', function(msg) {
+                // parse json data
+                //var data = JSON.parse(msg);
+                var data = msg;
+                // loop through key=systems:
+                for (var key in data) {
+                    // by default, the panel face is painted gray.
+                    // this changes if any of the params is "critical" and colored
+                    var panel_color = "secondary";
+                    //document.write(key+'\n');
+                    if (data.hasOwnProperty(key)) {
+                        // make sure the panel is displayed:
+                        //document.getElementById(key).style.display = "block";
+                        // global params
+                        for (var key2 in data[key]["globals"]) {
+                            if (data[key]["globals"].hasOwnProperty(key2)) {
+
+                                // colorize panel face if param is critical
+                                if (data[key]["globals"][key2][5]) { // critical?
+                                    switch (panel_color) {
+                                        case "secondary":
+                                            panel_color = data[key]["globals"][key2][1];
+                                            break;
+                                        case "success":
+                                            if (data[key]["globals"][key2][1]=="danger" ||
+                                                data[key]["globals"][key2][1]=="warning") {
+                                                panel_color = data[key]["globals"][key2][1];
+                                            }
+                                            break;
+                                        case "warning":
+                                            if (data[key]["globals"][key2][1]=="danger") {
+                                                panel_color = data[key]["globals"][key2][1];
+                                            }
+                                            break;
+                                        case "danger":
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        // "sub-systems"
+                        for (var key2 in data[key]["subs"]) {
+                            if (data[key]["subs"].hasOwnProperty(key2)) {
+                                //document.write(key2);
+                                for (var key3 in data[key]["subs"][key2]) {
+
+                                    // colorize panel face if param is critical
+                                    if (data[key]["subs"][key2][key3][5]) { // critical?
+                                        switch (panel_color) {
+                                            case "secondary":
+                                                panel_color = data[key]["subs"][key2][key3][1];
+                                                break;
+                                            case "success":
+                                                if (data[key]["subs"][key2][key3][1]=="danger" ||
+                                                    data[key]["subs"][key2][key3][1]=="warning") {
+                                                    panel_color = data[key]["subs"][key2][key3][1];
+                                                }
+                                                break;
+                                            case "warning":
+                                                if (data[key]["subs"][key2][key3][1]=="danger") {
+                                                    panel_color = data[key]["subs"][key2][key3][1];
+                                                }
+                                                break;
+                                            case "danger":
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // colorize label
+                        document.getElementById(key + "-label").className = "badge badge-" + panel_color;
+                    }
+                }
+            });
+
+            // get offset
+            document.getElementById('canvas-vicd').addEventListener('click', function(evt) {
+                if ($('#get-offset-on').hasClass( "active" )) {
+                    var mousePos = get_offset(document.getElementById('canvas-vicd'), evt);
+                    // show modal
+                    $('#offset-modal').modal('show');
+                    // populate offsets
+                    document.getElementById('tx-offset-text').innerHTML = 'Offsets from FoV center in arcsec: ' +
+                        (-mousePos.x).toFixed(1) + ' ' + (-mousePos.y).toFixed(1);
+                    document.getElementById('tx-offset-code').innerHTML = 'tx offset ' +
+                        (mousePos.x / 3600).toFixed(6) + ' ' + (-mousePos.y  / 3600).toFixed(6);
+                }
+            }, false);
+
+            $('#offsetTelescope').click(function () {
+                bootbox.confirm({
+                    message: "Do you want to offset the telescope?",
+                    buttons: {
+                        cancel: {
+                            label: '<i class="fa fa-times"></i> Cancel'
+                        },
+                        confirm: {
+                            label: '<i class="fa fa-check"></i> Confirm'
+                        }
+                    },
+                    callback: function (result) {
+                        // console.log('This was logged in the callback: ' + result);
+                        // confirmed? send AJAX request to server:
+                        if (result) {
+                            // console.log('Confirmed');
+                            // window.alert(document.getElementById('tx-offset-code').innerHTML);
+                            // emit halt event on click
+                            socket.emit('ssh-cmd', document.getElementById('tx-offset-code').innerHTML);
+                            // show modal
+                            $('#offset-modal').modal('hide');
+                        }
+                    }
+                });
+            });
+            // listen for halt status
+            socket.on('offset-telescope', function (status) {
+//                console.log(status);
+                if (status === 'ok') {
+                    showFlashingMessage("Info:", 'successfully offsetted telescope', 'success');
+//                    window.alert('Success!');
+//                    document.getElementById('halt-on').setAttribute('class', 'btn btn-lg btn-danger active');
+//                    document.getElementById('halt-off').setAttribute('class', 'btn btn-lg btn-outline-secondary');
+                }
+                else {
+                    showFlashingMessage("Info:", 'failed to offset telescope', 'danger');
+//                    window.alert('Fail :(');
+//                    document.getElementById('halt-off').setAttribute('class', 'btn btn-lg btn-danger active');
+//                    document.getElementById('halt-on').setAttribute('class', 'btn btn-lg btn-outline-secondary');
+                }
+            });
+        });
+
+        function get_offset(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            var w =  canvas.getContext('2d').canvas.width;
+            var h =  canvas.getContext('2d').canvas.height;
+            return {
+                x: (evt.clientX - rect.left -  w/2) / w * 36,
+                y: (evt.clientY - rect.top - h/2) / h * 36
+            };
+        }
+
+        function showFlashingMessage(title, message, type) {
+            $.notify({title: title, message: message},
+                {placement: {
+                    from: "bottom",
+                    align: "right"
+                },
+                    type: type,
+                    template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert" ' +
+                    'style="max-width:400px; font-size: 0.75rem;">' +
+                    '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+                    '<span data-notify="icon"></span> ' +
+                    '<span data-notify="title">{1}</span> ' +
+                    '<span data-notify="message">{2}</span>' +
+                    '<div class="progress" data-notify="progressbar">' +
+                    '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" ' +
+                    'aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+                    '</div>' +
+                    '<a href="{3}" target="{4}" data-notify="url"></a>' +
+                    '</div>'
+                });
+        }
+
+    </script>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="/"
+       style="{% if logo_font_family | length>0 %}font-family: '{{ logo_font_family }}'{% endif %}">{{ logo }}</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbars"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbars">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Status<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/image">Images</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/log">Logs</a>
+            </li>
+            {% for site, address in external_links %}
+            <li class="nav-item">
+                <a class="nav-link" target="_blank"
+                   href="{{ address }}">{{ site }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <ul class="navbar-nav navbar-right">
+            <li class="nav-item">
+                <a class="nav-link" href="/system">System</a>
+            </li>
+            <li class="nav-item" id="nav_logout">
+                <a class="nav-link" href="/logout">Log out</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="template">
+        <div class="row justify-content-md-center">
+            <div class="col-lg-1 col-md-12">
+                <label class="form-control-label" for="ir-fov">IR FoV</label>
+                <div class="btn-group btn-toggle mb-2" role="group" id="ir-fov">
+                    <button type="button" class="btn btn-sm btn-info active" id="ir-fov-on">ON</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">OFF</button>
+                </div>
+                <label class="form-control-label" for="get-offset">Get offset</label>
+                <div class="btn-group btn-toggle mb-2" role="group" id="get-offset">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="get-offset-on">ON</button>
+                    <button type="button" class="btn btn-sm btn-info active">OFF</button>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12">
+                <canvas id="canvas-dm" class="p-0 m-0"></canvas>
+                <canvas id="canvas-wfs" class="p-0 m-0"></canvas>
+            </div>
+            <div class="col-lg-auto col-md-12">
+                <canvas id="canvas-vicd" class="p-0 m-0"></canvas>
+            </div>
+            <br><br>
+
+        </div>
+    </div>
+
+</div><!-- /.container -->
+
+<div class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="modal-label" aria-hidden="true" id="offset-modal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <code id="tx-offset-text" style="color: #111111 !important;"></code>
+            <br>
+            <code id="tx-offset-code" style="color: #111111 !important;"></code>
+            <br>
+            <button type="button" class="btn btn-sm btn-danger" id="offsetTelescope">
+                Offset telescope
+            </button>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container-fluid">
+        {% for system, item in skelet %}
+        <span class="badge badge-light" id="{{ system }}-label"
+              style="font-size: 0.7rem; font-weight:200; cursor:pointer;">{{system}}</span>&nbsp;
+        {% endfor %}
+    </div>
+</footer>
+
+</body>
+</html>

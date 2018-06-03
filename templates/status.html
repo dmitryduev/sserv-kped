@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Dr. Dmitry A. Duev">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/robot-favicon.png" />
+
+    <title>Robo-AO Kitt Peak status page</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https:://cdnjs.cloudflare.com/ajax/libs/dygraph/2.0.0/dygraph.min.css" />
+
+    <!-- Custom styles for this page -->
+    <style>
+        div::-webkit-scrollbar {
+            display: none;
+        }
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+        body {
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            /* Margin bottom by footer height */
+            margin-bottom: 30px;
+        }
+        .template {
+            padding: 3.5rem 1rem;
+            text-align: left;
+        }
+        .table-condensed>thead>tr>th, .table-condensed>tbody>tr>th, .table-condensed>tfoot>tr>th,
+        .table-condensed>thead>tr>td, .table-condensed>tbody>tr>td, .table-condensed>tfoot>tr>td {
+            padding: 0;
+            margin: 0;
+            font-size: 0.57rem;
+        }
+        th {
+            font-weight: 500 !important;
+        }
+        .navbar {
+            padding: 0.3rem 2rem !important;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            /* Set the fixed height of the footer here */
+            height: 30px;
+            line-height: 30px; /* Vertically center the text there */
+            background-color: #212529;
+        }
+        @media only screen and (max-width: 768px) {
+            .footer  {
+                display:none;
+            }
+        }
+        .dygraph-ylabel {
+            font-size: 10px;
+            line-height: 100%;
+            text-align: right;
+        }
+
+        .dygraph-title {
+            font-size: 12px;
+            line-height: 100%;
+            margin:10px;
+            text-align: center;
+        }
+
+        .dygraph-axis-label { font-size: 10px; }
+
+        .dygraph-legend {
+            padding-top: 20px;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .bg-danger {
+            color: #fce2e2 !important;
+        }
+        .badge-danger {
+            color: #fce2e2 !important;
+        }
+        .bg-danger>a {
+            color: #fce2e2 !important;
+        }
+        .bg-info {
+            color: #e2e2fc !important;
+        }
+        .bg-info>a {
+            color: #e2e2fc !important;
+        }
+        .bg-success {
+            color: #e2fce2 !important;
+        }
+        .bg-success>a {
+            color: #e2fce2 !important;
+        }
+
+        @font-face {
+            font-family: Akashi;
+            src: url('/static/fonts/akashi.ttf');
+        }
+    </style>
+
+    <!-- Bootstrap core JavaScript
+================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.slim.js"></script>
+    <!-- Realtime charts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.0.0/dygraph.min.js"></script>
+
+    <script>
+        function plot_init(divid, yname, utc_local) {
+            var g = new Dygraph(document.getElementById(divid), [],
+                {
+                    drawPoints: true,
+                    //ylabel: yname,
+                    title: yname,
+//                    valueRange: [0.0, 1.2],
+                    labels: ['Time', yname],
+                    labelsUTC: utc_local == 'UTC'
+                });
+            return g;
+        }
+    </script>
+
+    <script>
+        // keep plots in one place:
+        var plots = {};
+
+        $(document).ready(function() {
+
+            var socket = io();
+
+            // received stuff from status.py
+            socket.on('telemetry', function(msg) {
+                // parse json data
+                //var data = JSON.parse(msg);
+                var data = msg;
+                // loop through key=systems:
+                for (var key in data) {
+                    // by default, the panel face is painted gray.
+                    // this changes if any of the params is "critical" and colored
+                    var panel_color = "secondary";
+                    //document.write(key+'\n');
+                    if (data.hasOwnProperty(key)) {
+                        // make sure the panel is displayed:
+                        //document.getElementById(key).style.display = "block";
+                        // global params
+                        for (var key2 in data[key]["globals"]) {
+                            if (data[key]["globals"].hasOwnProperty(key2)) {
+                                //document.write(key2 + " -> " + data[key]["globals"][key2]);
+                                //save current value and color:
+                                var tmp_val = document.getElementById(key+":"+key2).innerHTML;
+                                var tmp_col = document.getElementById(key+":"+key2).className;
+                                // value:
+                                document.getElementById(key + ":" + key2).innerHTML =
+                                    data[key]["globals"][key2][0];
+                                // color:
+                                document.getElementById(key + ":" + key2).className =
+                                    "bg-" + data[key]["globals"][key2][1];
+                                // log if something turned red or yellow
+//                                if ((tmp_col != "danger" &&
+//                                        data[key]["globals"][key2][1] == "danger") ||
+//                                        (tmp_col != "warning" &&
+//                                        data[key]["globals"][key2][1] == "warning")) {
+//                                    logit(data[key]["globals"][key2][1],
+//                                            key+":"+key2+ "<br>" +
+//                                            tmp_val + " -> " + data[key]["globals"][key2][0]);
+//                                }
+
+                                // plot stuff if set in config.json
+                                if (data[key]["globals"][key2][2]) {
+                                    // make sure the dropdown toggle for the plots part of panel is displayed:
+                                    document.getElementById(key+"-dropdown").style.display = "block";
+                                    // make sure the plots part of panel is displayed:
+                                    //document.getElementById(key+"-plots").style.display = "block";
+                                    // allocate place for array and for the plot if necessary:
+                                    var divid = key+":"+key2+":plot";
+                                    if ( !plots.hasOwnProperty(divid) ) {
+                                        // div for da plot exists?
+                                        var plot_divs = $("[id='" + key + "-plots-container'] > div").map(function(){
+                                            return this.id;
+                                        }).get();
+                                        //document.write(plot_divs);
+                                        // no? i can haz div?
+                                        if (plot_divs.indexOf(divid)==-1) {
+                                            $("[id='" + key + "-plots-container']").prepend( "<div id=\"" + divid +
+                                                "\" style=\"height:120px; padding:0px; margin-left:-40px;\"></div>" +
+                                                "<hr style='margin:0 -10px 0 -10px;'>" );
+                                        }
+                                        // init plot:
+                                        var g = plot_init(divid, divid, data[key]["globals"][key2][4]);
+                                        // keep it in a dark and dry place:
+                                        plots[divid] = [[], g];
+                                    }
+                                    // date in UTC:
+                                    var t_string = data[key]["globals"]["Time stamp"][0];
+                                    var t_ = t_string.split(/[^0-9]/);
+                                    var t = new Date(Date.UTC(t_[0],t_[1]-1,t_[2],t_[3],t_[4],t_[5],t_[6]));
+                                    // data point:
+                                    var x = data[key]["globals"][key2][0];
+
+                                    // check if the current t is not in there already
+                                    if (plots[divid][0].length==0 ||
+                                        plots[divid][0][plots[divid][0].length-1][0].getTime()!=t.getTime()) {
+                                        // skip -9999, they spoil the plots
+                                        if (x == "-9999") {
+                                            continue;
+                                        }
+                                        // save these:
+                                        plots[divid][0].push([t, parseFloat(x)]);
+                                        // array too long? we're displaying the last N points only
+                                        if (plots[divid][0].length > data[key]["globals"][key2][3]) {
+                                            plots[divid][0].shift();
+                                        }
+                                        // make/update plot:
+                                        //plots[divid][1].updateSize();
+                                        plots[divid][1].updateOptions( { 'file': plots[divid][0] } );
+                                        // y value range ok?
+                                        var Xval = plots[divid][0].map(function(value, index) { return value[1]; });
+                                        var Xmin = Math.min.apply(null, Xval);
+                                        var Xmax = Math.max.apply(null, Xval);
+//                                        plots[divid][1].updateOptions({ 'valueRange': [Xmin-0.1, Xmax+0.1] });
+                                    }
+                                }
+
+                                // colorize panel face if param is critical
+                                if (data[key]["globals"][key2][5]) { // critical?
+//                                    console.log(key2, panel_color);
+                                    switch (panel_color) {
+                                        case "secondary":
+                                            panel_color = data[key]["globals"][key2][1];
+                                            break;
+                                        case "success":
+                                            if (data[key]["globals"][key2][1]=="danger" ||
+                                                data[key]["globals"][key2][1]=="warning") {
+                                                panel_color = data[key]["globals"][key2][1];
+                                            }
+                                            break;
+                                        case "warning":
+                                            if (data[key]["globals"][key2][1]=="danger") {
+                                                panel_color = data[key]["globals"][key2][1];
+                                            }
+                                            break;
+                                        case "danger":
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        // "sub-systems"
+                        for (var key2 in data[key]["subs"]) {
+                            if (data[key]["subs"].hasOwnProperty(key2)) {
+                                //document.write(key2);
+                                for (var key3 in data[key]["subs"][key2]) {
+                                    //document.write(key3 + " -> " + data[key]["subs"][key2][key3]);
+                                    //save current value and color:
+                                    tmp_val = document.getElementById(key+":"+key2+":"+key3).innerHTML;
+                                    tmp_col = document.getElementById(key+":"+key2+":"+key3).className;
+                                    // value:
+                                    document.getElementById(key+":"+key2+":"+key3).innerHTML =
+                                        data[key]["subs"][key2][key3][0];
+                                    // color:
+                                    document.getElementById(key+":"+key2+":"+key3).className =
+                                        'bg-' + data[key]["subs"][key2][key3][1];
+                                    // log if something turned red or yellow
+//                                    if ((tmp_col != "danger" &&
+//                                            data[key]["subs"][key2][key3][1] == "danger") ||
+//                                            (tmp_col != "warning" &&
+//                                            data[key]["subs"][key2][key3][1] == "warning")) {
+//                                        logit(data[key]["subs"][key2][key3][1],
+//                                                key+":"+key2+":"+key3 + "<br>" +
+//                                                tmp_val + " -> " + data[key]["subs"][key2][key3][0]);
+//                                    }
+                                    // plot stuff if set in config.json
+                                    if (data[key]["subs"][key2][key3][2]) {
+                                        // make sure the dropdown toggle for the plots part of panel is displayed:
+                                        document.getElementById(key+"-dropdown").style.display = "block";
+                                        // make sure the plots part of panel is displayed:
+                                        //document.getElementById(key+"-plots").style.display = "block";
+                                        // allocate place for array and for the plot if necessary:
+                                        var divid = key+":"+key2+":"+key3+":plot";
+                                        if ( !plots.hasOwnProperty(divid) ) {
+                                            // div for da plot exists?
+                                            var plot_divs = $("[id='" + key + "-plots-container'] > div").map(function(){
+                                                return this.id;
+                                            }).get();
+                                            //document.write(plot_divs);
+                                            // no? i can haz div?
+                                            if (plot_divs.indexOf(divid)==-1) {
+                                                $("[id='" + key + "-plots-container']").prepend( "<div id=\"" + divid +
+                                                    "\" style=\"height:120px; padding:0px; margin-left:-40px;\"></div>" +
+                                                    "<hr style='margin:0 -10px 0 -10px;'>" );
+                                            }
+                                            // init plot:
+                                            var g = plot_init(divid, divid, data[key]["subs"][key2][key3][4]);
+                                            // keep it in a dark and dry place:
+                                            plots[divid] = [[], g];
+                                        }
+                                        // date in UTC:
+                                        var t_string = data[key]["globals"]["Time stamp"][0];
+                                        var t_ = t_string.split(/[^0-9]/);
+                                        var t = new Date(Date.UTC(t_[0],t_[1]-1,t_[2],t_[3],t_[4],t_[5],t_[6]));
+                                        // data point:
+                                        var x = data[key]["subs"][key2][key3][0];
+
+                                        // check if the current t is not in there already
+                                        if (plots[divid][0].length==0 ||
+                                            plots[divid][0][plots[divid][0].length-1][0].getTime()!=t.getTime()) {
+                                            // skip -9999, they spoil the plots
+                                            if (x == "-9999") {
+                                                continue;
+                                            }
+                                            // save these:
+                                            plots[divid][0].push([t, parseFloat(x)]);
+                                            // array too long? we're displaying the last N points only
+                                            if (plots[divid][0].length > data[key]["subs"][key2][key3][3]) {
+                                                plots[divid][0].shift();
+                                            }
+                                            // make/update plot:
+                                            //plots[divid][1].updateSize();
+                                            plots[divid][1].updateOptions( { 'file': plots[divid][0] } );
+                                            // y value range ok?
+                                            var Xval = plots[divid][0].map(function(value,index) { return value[1]; });
+                                            var Xmin = Math.min.apply(null, Xval);
+                                            var Xmax = Math.max.apply(null, Xval);
+//                                            plots[divid][1].updateOptions({ 'valueRange': [Xmin-0.1, Xmax+0.1] });
+                                        }
+                                    }
+                                    // colorize panel face if param is critical
+                                    if (data[key]["subs"][key2][key3][5]) { // critical?
+                                        switch (panel_color) {
+                                            case "secondary":
+                                                panel_color = data[key]["subs"][key2][key3][1];
+                                                break;
+                                            case "success":
+                                                if (data[key]["subs"][key2][key3][1]=="danger" ||
+                                                    data[key]["subs"][key2][key3][1]=="warning") {
+                                                    panel_color = data[key]["subs"][key2][key3][1];
+                                                }
+                                                break;
+                                            case "warning":
+                                                if (data[key]["subs"][key2][key3][1]=="danger") {
+                                                    panel_color = data[key]["subs"][key2][key3][1];
+                                                }
+                                                break;
+                                            case "danger":
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // colorize card header
+//                    console.log(key, panel_color);
+                        document.getElementById(key).className = "card-header p-0 pl-2 bg-" + panel_color;
+                        document.getElementById(key + "-card").className = "card rounded border border-" + panel_color;
+                        // colorize label
+                        document.getElementById(key + "-label").className = "badge badge-" + panel_color;
+                    }
+                }
+                //document.write(data);
+            });
+        });
+
+    </script>
+
+    <!-- Show/hide plots -->
+    <script>
+        function showHidePlots(key) {
+            if ($("[id='" + key + "-dropdown']").children("i").attr("class") == "fa fa-lg fa-angle-up") {
+                $("[id='" + key + "-dropdown']").children("i").attr("class",
+                    "fa fa-lg fa-angle-down");
+                document.getElementById(key+"-plots").style.display = "none";
+            }
+            else { if ($("[id='" + key + "-dropdown']").children("i").attr("class") == "fa fa-lg fa-angle-down") {
+                $("[id='" + key + "-dropdown']").children("i").attr("class",
+                    "fa fa-lg fa-angle-up");
+                document.getElementById(key+"-plots").style.display = "block";
+                $("[id='" + key + "-plots-container']").children("div").each(function(){
+                    plots[$(this).attr('id')][1].resize();
+                });
+            } }
+        }
+        // minimize plots on body load
+        $( document ).ready(setTimeout(function() {
+            {% for system, item in skelet %}
+            showHidePlots("{{system}}");
+            {% endfor %}
+        }, 2000));
+    </script>
+
+    <script>
+        function scrollTo(div) {
+            $('html, body').animate({ scrollTop: $("[id='" + div + "']").offset().top - 40 });
+        }
+    </script>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="/"
+       style="{% if logo_font_family | length>0 %}font-family: '{{ logo_font_family }}'{% endif %}">{{ logo }}</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbars"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbars">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Status<span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/image">Images</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/log">Logs</a>
+            </li>
+            {% for site, address in external_links %}
+                <li class="nav-item">
+                    <a class="nav-link" target="_blank"
+                       href="{{ address }}">{{ site }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+        <ul class="navbar-nav navbar-right">
+            <li class="nav-item">
+                <a class="nav-link" href="/system">System</a>
+            </li>
+            <li class="nav-item" id="nav_logout">
+                <a class="nav-link" href="/logout">Log out</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid">
+
+    <div class="template">
+
+        {% for system, item in skelet %}
+
+        <div class="row mb-2">
+            <div class="col">
+                <div class="card" id="{{ system }}-card">
+                    <div class="card-header p-0 pl-2" id="{{ system }}">
+                        <span style="font-weight: 400; font-size: 0.9rem;">{{system}}</span>
+                        <a class="float-right pr-2 pb-0 mb-0" data-toggle="collapse" href="#plots"
+                           aria-expanded="false" aria-controls="collapseExample" id="{{system}}-dropdown"
+                           onClick="showHidePlots('{{system}}')"
+                           style="display:none; margin-top: -0.1rem;">
+                            <i class="fa fa-lg fa-angle-up" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                    <div class="card-body text-truncate table-responsive p-0 pl-2 pr-2"
+                         style="display: inline-block; overflow-x: scroll;
+                                -webkit-overflow-scrolling: touch;">
+                        <table class="table table-sm table-condensed table-bordered mb-1">
+                            <thead>
+
+                            <tr>
+                                {% if skelet[system]['globals'].keys()|length() > 0 %}
+                                    <th colspan="{{ skelet[system]['globals'].keys()|length() }}"></th>
+                                {% endif %}
+                                {% if skelet[system]['subs'].keys()|length() > 0 %}
+                                    {% for key, item in skelet[system]['subs'] %}
+                                        <th colspan="{{ skelet[system]['subs'][key].keys()|length() }}"
+                                            style="text-align: center;">{{ key }}</th>
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+
+                            <tr>
+                                {% if skelet[system]['globals'].keys()|length() > 0 %}
+                                    {% for key, item in skelet[system]['globals'] %}
+                                        <th>{{ key }}</th>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if skelet[system]['subs'].keys()|length() > 0 %}
+                                    {% for key, item in skelet[system]['subs'] %}
+                                        {% for key2, item in skelet[system]['subs'][key] %}
+                                            <th>{{ key2 }}</th>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+                            <tr>
+                                <!-- Global params -->
+                                {% if skelet[system]['globals'].keys()|length() > 0 %}
+                                    {% for key, item in skelet[system]['globals'] %}
+                                        <td id="{{system}}:{{key}}"></td>
+                                    {% endfor %}
+                                {% endif %}
+
+                                <!-- Data Tables  -->
+                                {% if skelet[system]['subs'].keys()|length() > 0 %}
+                                    {% for key, item in skelet[system]['subs'] %}
+                                        {% for key2, item in skelet[system]['subs'][key] %}
+                                            <td id="{{system}}:{{key}}:{{key2}}"></td>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+
+                            </tr>
+                            </tbody>
+
+                        </table>
+
+                        <hr style="margin:0 -10px 0 -10px;">
+
+                        <!-- Real time charts -->
+                        <div style="display:block;" id="{{system}}-plots">
+                            <!--<hr style="margin:0 -10px 0 -10px;">-->
+                            <div id="{{system}}-plots-container">
+                                <!-- Placeholder for da plots -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div><!-- /.container -->
+
+<footer class="footer">
+    <div class="container-fluid">
+        {% for system, item in skelet %}
+        <span class="badge badge-light" id="{{ system }}-label"
+              style="font-size: 0.7rem; font-weight:200; cursor:pointer;"
+              onclick="scrollTo('{{system}}')">{{system}}</span>&nbsp;
+        {% endfor %}
+    </div>
+</footer>
+
+</body>
+</html>
