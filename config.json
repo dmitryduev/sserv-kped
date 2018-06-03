@@ -1,7 +1,7 @@
 {
   "settings": {
     "logo": "KPED",
-    "logo-font-family": "sans-serif",
+    "logo-font-family": "",
     "port": 8080,
     "telemetry_update_ms": 900,
     "images_update_ms": 900,
