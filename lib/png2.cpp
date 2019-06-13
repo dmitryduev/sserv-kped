@@ -671,14 +671,14 @@ int main(int argc, char *argv[])
 
 
         // vicd: generate RGB image
-         const unsigned w = 1024;
-         const unsigned h = 1024;
-         unsigned w_c = 1024;
-         unsigned h_c = 1024;
-//        const unsigned w = 512;
-//        const unsigned h = 512;
-//        unsigned w_c = 512;
-//        unsigned h_c = 512;
+//         const unsigned w = 1024;
+//         const unsigned h = 1024;
+//         unsigned w_c = 1024;
+//         unsigned h_c = 1024;
+        const unsigned w = 512;
+        const unsigned h = 512;
+        unsigned w_c = 512;
+        unsigned h_c = 512;
         unsigned w_start = 0;
         unsigned w_stop = w;
         unsigned h_start = 0;
