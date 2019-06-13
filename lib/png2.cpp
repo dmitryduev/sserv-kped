@@ -671,17 +671,21 @@ int main(int argc, char *argv[])
 
 
         // vicd: generate RGB image
+        unsigned w = 1024;
+        unsigned h = 1024;
+        unsigned w_c = 1024;
+        unsigned h_c = 1024;
         if (pow(img_sorted.size()-1, 0.5) == 1024) {
-             const unsigned w = 1024;
-             const unsigned h = 1024;
-             unsigned w_c = 1024;
-             unsigned h_c = 1024;
+             w = 1024;
+             h = 1024;
+             w_c = 1024;
+             h_c = 1024;
          }
          else if (pow(img_sorted.size()-1, 0.5) != 512) {
-            const unsigned w = 512;
-            const unsigned h = 512;
-            unsigned w_c = 512;
-            unsigned h_c = 512;
+            w = 512;
+            h = 512;
+            w_c = 512;
+            h_c = 512;
          }
         unsigned w_start = 0;
         unsigned w_stop = w;
