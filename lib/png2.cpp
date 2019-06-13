@@ -684,7 +684,7 @@ int main(int argc, char *argv[])
         unsigned h_start = 0;
         unsigned h_stop = h;
 
-        std::cout << pow(img_sorted.size()-1, 0.5) << std::endl;
+//        std::cout << pow(img_sorted.size()-1, 0.5) << std::endl;
 
         // full-frame vs quarter-frame images:
         if (pow(img_sorted.size()-1, 0.5) == 256) {
