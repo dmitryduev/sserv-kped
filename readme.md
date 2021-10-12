@@ -1,4 +1,4 @@
-### System/telemetry monitoring interface for KPED. 
+### System/telemetry monitoring interface for [KPED](https://kped.org/). 
 
 An interactive interface for monitoring fixed-format telemetry files, Andor camera images, and system logs.
 Node.js/socket.io-based back-end and bootstrap v4-based front-end.
