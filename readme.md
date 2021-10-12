@@ -1,4 +1,15 @@
-### System monitoring interface with node.js/socket.io-based back-end and bootstrap v4-based front-end for Robo-AO. 
+### System/telemetry monitoring interface for KPED. 
+
+An interactive interface for monitoring fixed-format telemetry files, Andor camera images, and system logs.
+Node.js/socket.io-based back-end and bootstrap v4-based front-end.
+
+Flexible telemetry parsing rules are defined in [config.json](https://github.com/dmitryduev/sserv-kped/blob/master/config.json).
+
+Telemetry monitoring in action:
+![kped](https://user-images.githubusercontent.com/7557205/136889094-1bfc6235-b484-4c4f-9500-06976f678b49.gif)
+
+System log monitoring in action:
+![image](https://user-images.githubusercontent.com/7557205/136889333-12d1719b-2c0d-428a-ba8a-769324b8da6f.png)
 
 #### Deployment
 
