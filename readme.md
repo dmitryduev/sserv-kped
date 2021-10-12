@@ -13,9 +13,9 @@ System log monitoring in action:
 
 #### Deployment
 
-- Install node.js and npm if not in the system. The code now uses socket.io v2, which in turn requires a fairly
-recent version of node.js (>4). In case that is not available on your system with the default package manager, install 
-node.js manually. For example, on Fedora 21:
+- Install `node.js` and `npm`. The code uses `socket.io` v2, which in turn requires a fairly
+recent version of `node.js` (>4). In case that is not available on your system with the default package manager, 
+install `node.js` manually. For example, on Fedora 21:
 ```bash
 # remove old nodejs version:
 yum remove nodejs
@@ -24,36 +24,36 @@ curl --silent --location https://rpm.nodesource.com/setup_4.x | bash -
 yum install -y nodejs
 ```  
 
-- Install pm2 process manager:
+- Install the `pm2` process manager:
 
 ```bash
 npm install pm2 -g
 ```
 
-- Clone the repository and install node.js app dependencies:
+- Clone the repository and install `node.js` app dependencies:
 
 ```bash
-git clone https://github.com/dmitryduev/sserv-njs.git
-cd sserv-njs
+git clone https://github.com/dmitryduev/sserv-kped.git
+cd sserv-kped
 npm install
 ```
 
-- Edit config.json - change settings including those for logs and telemetry files 
-(paths could be both abs and rel) and description of their content
+- Edit `config.json` - change settings including those for logs and telemetry files 
+(paths could be both absosulte and relative) and the description of their contents
 
-- Run the server as a daemon (from the cloned directory!):
+- Run the server as a daemon (from the cloned directory):
 
 ```bash
 pm2 start server_status.js -- config.json
 ```
 
-- Run the control machine status monitor as a daemon (from the cloned directory!):
+- Run the control machine status monitor as a daemon (from the cloned directory):
 
 ```bash
 pm2 start system_status.py --interpreter=/path/to/python -- config.json
 ```
 
-By default, the server will run on port 8080. That could be changed in _config.json_.
+By default, the server will run on port 8080. That could be changed in `config.json`.
 
 - To monitor performance:
 
@@ -61,7 +61,7 @@ By default, the server will run on port 8080. That could be changed in _config.j
 pm2 monit
 ```
 
-- To set up pm2 to run/resurrect at system startup/reboot:
+- To set up `pm2` to run/resurrect at system startup/reboot:
 
 ```bash
 pm2 startup
@@ -79,7 +79,7 @@ It will save the process list with the corresponding environments into the dump 
 
 For more details go [here](http://pm2.keymetrics.io/docs/usage/startup/#saving-current-process-list)
 
-#### Description of config.json
+#### `config.json` structure
 
 ##### The "status" section 
 
@@ -126,12 +126,12 @@ The 3rd arg controls plotting. The first value (boolean) in the list - display p
 second \[must be set if first value is true\] - how many points to display before starting to shift the plot 
 (by default - 600, which corresponds to 10 minutes
 if updated each second); third \[must be set if first value is true\] - display time stamps in UTC ("UTC", default) 
-or local time ("local") 
+or local time ("local").
 
-4th arg - controls if the whole panel should turn red/yellow if this param turns red/yellow
+4th arg - controls if the whole panel should turn red/yellow if this param turns red/yellow.
 
 
-Refer to the provided config.json for examples.
+Refer to the provided [config.json](https://github.com/dmitryduev/sserv-kped/blob/master/config.json) for examples.
 
 ##### The "log" section
 
